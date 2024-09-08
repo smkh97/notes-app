@@ -64,7 +64,7 @@
                   </v-btn>
                 </template>
                 <span>Delete team</span>
-              </v-tooltip>            
+              </v-tooltip>
               <v-tooltip v-else top>
                 <template #activator="{ on, attrs }">
                   <v-btn v-bind="attrs" icon v-on="on" @click="addMembers(indexs)">
@@ -128,13 +128,16 @@
 
 <script>
 import { mapMutations, mapActions, mapGetters } from 'vuex'
+
+const MAXIMUM_TEAM_LENGTH = 11; // Team length allowed for max db write for a single user
+
 export default {
+
   data: () => ({
-    benched: 0,
-    isEdit: false,
-    isTeamTitle: false,
-    teamTitle: '',
-    teams: [],
+    isEdit: false, // Boolean flag to enable or disable editing mode
+    isTeamTitle: false, // Boolean flag to check if empty title is present
+    teamTitle: '', // Text field to set team title 
+    teams: [], // Array of teams list
   }),
   computed: {
     ...mapGetters({
@@ -143,6 +146,7 @@ export default {
     })
   },
   mounted() {
+    // Init the teams for the user from backend db
     this.getTeam()
   },
   methods: {
@@ -156,9 +160,12 @@ export default {
       setSnackbar: 'layouts/setSnackbar',
       setDialog: 'layouts/setDialog',
     }),
-
+    /**
+     * Evaluates if maximum team length is met ,
+     * if not update the state , else log the snackbar
+     */
     addTeams() {
-      if (this.teams.length < 11) {
+      if (this.teams.length < MAXIMUM_TEAM_LENGTH) {
         this.teams.push({
           name: '',
           members: [],
@@ -171,15 +178,28 @@ export default {
         })
       }
     },
+    /**
+     * Takes in number and pushes the new data value for user management
+    * @param {Number} index takes in the index at which the point of member should be created
+    */
     addMembers(index) {
       this.teams[index].members.push({
         nickName: '',
         isMemberEdit: true,
       })
     },
+    /**
+     *  Boolean flag to enable disable edit mode
+     */
     editMode() {
       this.isEdit = !this.isEdit
     },
+    /**
+     * Deletes the local index from the teams array state and calls actions to 
+     * delete the team from the db , if its not isAutoDelete
+     * @param {Number} index takes in the index at which the point of team should be created
+     * @param {Boolean} isAutoDelete splice the local team and does not update an empty team to the db
+     */
     deleteTeam(index, isAutoDelete) {
       if (isAutoDelete) {
         this.teams.splice(index, 1)
@@ -188,8 +208,14 @@ export default {
         this.teams.splice(index, 1)
         this.deleteEditedTeams()
       }
-
     },
+     /**
+      * Deletes single memebers from the team and updates the team array 
+      * delete the team member from the db , if its not isAutoDelete
+      * @param {Number} index takes in the index at which the point of member should be deleted
+      * @param {Number} subIndex takes in the index at which the point of member should be created
+      * @param {Boolean} isAutoDelete splice the local team and does not update an empty team to the db
+      */
     deleteMembers(index, subIndex, isAutoDelete) {
       if (isAutoDelete) {
         this.teams[index].members.splice(subIndex, 1)
@@ -200,6 +226,9 @@ export default {
       }
 
     },
+     /**
+      * calls api and deletes the edited team
+      */
     async deleteEditedTeams() {
       try {
         this.setIsOverlayAndLoading(true)
@@ -223,6 +252,11 @@ export default {
         this.setIsOverlayAndLoading(false)
       }
     },
+     /**
+      * checks if user has entered a null name on edit mode
+      * @param {Number} indexs parent index of the loop
+      * @param {index} index child member index of the loop
+      */
     checkIsNoName(indexs, index) {
       if (this.teams[indexs].members[index].nickName === '') {
         this.deleteMembers(indexs, index, true)

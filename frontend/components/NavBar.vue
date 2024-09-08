@@ -45,18 +45,18 @@ import SideMenu from './SideMenu.vue'
 export default {
   components: { Profile, SideMenu },
   data: () => ({
-    isDrawer: true,
-    mini:true,
-    isMobile:false
+    isDrawer: true, // Boolean flag for opening and closing drawer
+    mini:true, // Vuetify prop for half nav drawer 
+    isMobile:false // Boolean flag for mobile detection
   }),
   methods: {
     ...mapMutations({
       setIsOverlayAndLoading: "layouts/setIsOverlayAndLoading"
     }),
     /**
-* Handles drawer closing and opening with mini side drawer
-* with state sync
-*/
+    * Handles drawer closing and opening with mini side drawer
+    * with state sync
+    */
     openCloseDrawer() {
       if(this.$vuetify.breakpoint.mdAndDown)
       {

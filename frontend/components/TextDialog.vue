@@ -34,15 +34,17 @@ export default {
       type: Object,
       default: null
     },
-    
+
   },
   data() {
     return {
       textValue: null,
-      isShow:true,
+      isShow: true,
     }
   },
-
+  /**
+   * Intialize dialog and display the value passed to it 
+   */
   methods: {
     setValue() {
       this.setDialogValue(this.textValue)
